@@ -18,7 +18,7 @@ func Decrypt(data, salt, rsaPublicKey []byte) (ret []byte, err error) {
 		return
 	}
 	dec := gob.NewDecoder(&buf)
-	err = dec.Decode(payload)
+	err = dec.Decode(&payload)
 	if err != nil {
 		return
 	}
@@ -30,6 +30,9 @@ func Decrypt(data, salt, rsaPublicKey []byte) (ret []byte, err error) {
 	h1.Write(salt)
 	saltHash := h1.Sum(nil)
 	passwd := append(passHash, saltHash...)
-	ret, err = aes.CBCDecrypt(payload.Aes, passwd, []byte(_IV))
+	h2 := sha1.New()
+	h2.Write(passwd)
+	hashPasswd := h2.Sum(nil)
+	ret, err = aes.CBCDecrypt(payload.Aes, hashPasswd, []byte(_IV))
 	return
 }

@@ -23,7 +23,10 @@ func Encrypt(data, pass, salt, rsaPrivateKey []byte) (ret []byte, err error) {
 	h1.Write(salt)
 	saltHash := h1.Sum(nil)
 	passwd := append(passHash, saltHash...)
-	payload.Aes, err = aes.CBCEncrypt(data, passwd, []byte(_IV))
+	h2 := sha1.New()
+	h2.Write(passwd)
+	hashPasswd := h2.Sum(nil)
+	payload.Aes, err = aes.CBCEncrypt(data, hashPasswd, []byte(_IV))
 	if err != nil {
 		return
 	}
