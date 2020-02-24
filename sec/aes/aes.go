@@ -1,6 +1,9 @@
 // Package aes aes encryption and decryption
 // Because the Go standard library has incomplete support for AES-192, AES-256, only aes-cbc-128 is allowed
 // blockSize 16 = aes-cbc-128, 24 = aes-cbc-192, 32 = aes-cbc-256
+// Related Links https://studygolang.com/articles/7302
+// https://blog.csdn.net/xiaohu50/article/details/51682849
+// https://www.jianshu.com/p/3741458695d2
 package aes
 
 import (
@@ -31,10 +34,10 @@ var (
 	ErrInvalidPKCS7Padding = errors.New("invalid padding on input")
 )
 
-// Decrypt Decrypt aes data
+// CBCDecrypt Decrypt aes data
 //接收一个16进制编码的字节切片
 //参数1:16进制aes加密数据,参数2:aes加密key,参数3:aes加密偏移向量
-func Decrypt(hexStr []byte, key []byte, iv []byte) (data []byte, err error) {
+func CBCDecrypt(hexStr []byte, key []byte, iv []byte) (data []byte, err error) {
 	cipherText, err := hex.DecodeString(string(hexStr))
 	if err != nil {
 		return
@@ -52,8 +55,8 @@ func Decrypt(hexStr []byte, key []byte, iv []byte) (data []byte, err error) {
 	return
 }
 
-// Encrypt Returns a hexadecimal encoded aes encrypted string
-func Encrypt(plantText []byte, key []byte, iv []byte) (cryptBytes []byte, err error) {
+// CBCEncrypt Returns a hexadecimal encoded aes encrypted string
+func CBCEncrypt(plantText []byte, key []byte, iv []byte) (cryptBytes []byte, err error) {
 	block, err := aes.NewCipher(PaddingLeft(key, _PAD, _BLOCK_SIZE)) //选择加密算法
 	if err != nil {
 		return
