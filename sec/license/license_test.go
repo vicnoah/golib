@@ -3,6 +3,8 @@ package license
 import (
 	"bytes"
 	"e.coding.net/vector-tech/golib/sec/rsa"
+	"io/ioutil"
+	"os"
 	"testing"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -57,6 +59,31 @@ func TestLicense(t *testing.T) {
 			So(er, ShouldNotBeNil)
 			So(ret2, ShouldNotResemble, data.Data)
 		}
+	})
+}
+
+func TestDecryptionLicense(t *testing.T)  {
+	pubKey := `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCt7uZyFteXRPZdXTqqMw7ND2IC
+p0Si36x/WXMXTNlI2goE4qrTkoWU7s1aNJxIqJItVBUgfzQ6ICkKG/vwcgQ9qf2s
+l9iwl+yVDykrL9H3eVrVqE2Zcq3TQnB9g0cXUexZCYgwnxgwXJWxArl5iYU/jH0D
+01FPN0H8XqwDb5kGwwIDAQAB
+-----END PUBLIC KEY-----`
+	result := `{"app":"","version":"","award":"","type":1,"start_time":1582625678,"expire":31536000,"permissions":"dsfjfjfsdjf\n"}`
+	salt := "vector"
+	licenseFile, err := os.Open("license.vec")
+	if err != nil {
+		return
+	}
+	defer licenseFile.Close()
+	data, err := ioutil.ReadAll(licenseFile)
+	if err != nil {
+		return
+	}
+	Convey("test read license", t, func() {
+		ret, er := Decrypt(data, []byte(salt), []byte(pubKey))
+		So(er, ShouldBeNil)
+		So(string(ret), ShouldEqual, result)
 	})
 }
 
