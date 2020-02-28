@@ -1,0 +1,32 @@
+package wr
+
+import (
+	"e.coding.net/vector-tech/golib/os/path/home"
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+)
+
+// Write 写入授权
+func Write(input io.Reader) (err error) {
+	appPath := path.Join(home.UserAppDataPath(), APP_CONFIG_PATH)
+	appPath = filepath.ToSlash(appPath)
+	err = os.MkdirAll(appPath, os.ModePerm)
+	if err != nil {
+		return
+	}
+	licenseData, err := ioutil.ReadAll(input)
+	if err != nil {
+		return
+	}
+	fn := path.Join(appPath, LicenseName)
+	licenseFile, err := os.OpenFile(fn, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return
+	}
+	defer licenseFile.Close()
+	_, err = licenseFile.Write(licenseData)
+	return
+}
