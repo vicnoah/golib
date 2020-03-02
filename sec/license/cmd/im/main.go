@@ -85,7 +85,10 @@ func actionImport() (err error) {
 }
 
 func actionRead() (err error) {
-	salt := "vector"
+	sl, err := salt.Get()
+	if err != nil {
+		return
+	}
 	f, err := os.Open(pubKeyFile)
 	if err != nil {
 		return
@@ -94,7 +97,7 @@ func actionRead() (err error) {
 	if err != nil {
 		return
 	}
-	ret, err := wr.Read([]byte(salt), pubKey)
+	ret, err := wr.Read(sl, pubKey)
 	if err != nil {
 		return
 	}
