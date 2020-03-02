@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-// Get 获取操作系统信息生成salt，用于授权绑定
+// Get Obtain operating system information to generate a salt for authorization binding
+// The current implementation is not perfect, you need to rely on wmic
 func Get() (sl []byte, err error) {
 	cmd := exec.Command("CMD", "/C", "WMIC DISKDRIVE GET SERIALNUMBER")
 	allInfo, err := cmd.Output()
