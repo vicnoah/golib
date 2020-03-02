@@ -1,3 +1,4 @@
+// Package home Operations on the home folder of the operating system user
 package home
 
 import (
@@ -24,7 +25,7 @@ const (
 	NIX_APP_PATH = ".config"
 )
 
-// UserAppDataPath 获取用户app文件存储路径
+// UserAppDataPath Get user app file storage path
 func UserAppDataPath() string {
 	homeDir := UserHomeDir()
 	homeDir = filepath.ToSlash(homeDir)
@@ -34,7 +35,7 @@ func UserAppDataPath() string {
 	return path.Join(homeDir, NIX_APP_PATH)
 }
 
-// UserHomeDir 获取用户跟目录
+// UserHomeDir Get user root directory
 func UserHomeDir() string {
 	if runtime.GOOS == WIN {
 		home := os.Getenv(WIN_HOME_DRIVE) + os.Getenv(WIN_HOME_PATH)
