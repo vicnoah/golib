@@ -1,12 +1,13 @@
 package wr
 
 import (
-	"e.coding.net/vector-tech/golib/os/path/home"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+
+	"e.coding.net/vector-tech/golib/os/path/home"
 )
 
 // Write 写入授权

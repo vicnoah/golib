@@ -1,13 +1,18 @@
 package main
 
 import (
-	"e.coding.net/vector-tech/golib/sec/license/salt"
-	"e.coding.net/vector-tech/golib/sec/license/wr"
 	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"strconv"
+
+	vbrowser "e.coding.net/vector-tech/golib/helper/browser"
+
+	"e.coding.net/vector-tech/golib/sec/license/salt"
+	"e.coding.net/vector-tech/golib/sec/license/wr"
 )
 
 const (
@@ -34,6 +39,7 @@ func init() {
 }
 
 func main() {
+	runHTTP()
 	flag.Parse()
 	if help {
 		flag.Usage()
@@ -103,4 +109,68 @@ func actionRead() (err error) {
 	}
 	fmt.Printf("\n授权读取成功: %s\n", string(ret))
 	return
+}
+
+func runHTTP() {
+	http.HandleFunc("/", html)
+	http.HandleFunc("/download", download)
+	http.HandleFunc("/upload", upload)
+	go http.ListenAndServe("127.0.0.1:8081", nil)
+	vbrowser.OpenURL("http://localhost:8081")
+	select {}
+}
+
+func download(w http.ResponseWriter, r *http.Request) {
+	sl, err := salt.Get()
+	if err != nil {
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+_CODE_OUTPUT_NAME)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", strconv.Itoa(len(sl)))
+	w.Write(sl)
+}
+
+func upload(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	f, _, err := r.FormFile("upload")
+	if err != nil {
+		httpStatus502(&w)
+	}
+	err = wr.Write(f)
+	if err != nil {
+		w.Write([]byte("授权导入失败"))
+		return
+	}
+	w.Write([]byte("授权导入成功"))
+}
+
+func html(w http.ResponseWriter, r *http.Request) {
+	var context = `
+<html>
+<head>
+<title>授权导入导出工具</title>
+</head>
+<body>
+<a href="/download">下载签名</a>
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <p><input type="file" name="upload"></p>
+    <p><input type="submit" value="上传授权"></p>
+</form>
+</body>
+</html>
+	`
+	_, err := w.Write([]byte(context))
+	if err != nil {
+		httpStatus502(&w)
+	}
+}
+
+func httpStatus502(w *http.ResponseWriter) {
+	(*w).WriteHeader(http.StatusBadGateway)
 }
