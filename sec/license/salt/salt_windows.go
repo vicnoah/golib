@@ -5,12 +5,14 @@ import (
 	"encoding/hex"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // Get Obtain operating system information to generate a salt for authorization binding
 // The current implementation is not perfect, you need to rely on wmic
 func Get() (sl []byte, err error) {
 	cmd := exec.Command("CMD", "/C", "WMIC DISKDRIVE GET SERIALNUMBER")
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	allInfo, err := cmd.Output()
 	if err != nil {
 		return
