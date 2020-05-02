@@ -1,7 +1,7 @@
 package main
 
 import (
-	"e.coding.net/vector-tech/golib/sec/rsa"
+	"git.sabertrain.com/vector-tech/golib/sec/rsa"
 	"flag"
 	"fmt"
 	"os"

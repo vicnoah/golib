@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"e.coding.net/vector-tech/golib/sec/license/cmd/raw_license/stuc"
+	"git.sabertrain.com/vector-tech/golib/sec/license/cmd/raw_license/stuc"
 	"time"
 )
 

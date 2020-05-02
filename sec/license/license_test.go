@@ -2,7 +2,7 @@ package license
 
 import (
 	"bytes"
-	"e.coding.net/vector-tech/golib/sec/rsa"
+	"git.sabertrain.com/vector-tech/golib/sec/rsa"
 	"io/ioutil"
 	"os"
 	"testing"

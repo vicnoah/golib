@@ -3,8 +3,8 @@ package license
 import (
 	"bytes"
 	"crypto/sha1"
-	"e.coding.net/vector-tech/golib/sec/aes"
-	"e.coding.net/vector-tech/golib/sec/rsa"
+	"git.sabertrain.com/vector-tech/golib/sec/aes"
+	"git.sabertrain.com/vector-tech/golib/sec/rsa"
 	"encoding/gob"
 )
 

@@ -1,13 +1,13 @@
 package wr
 
 import (
-	"e.coding.net/vector-tech/golib/os/path/home"
+	"git.sabertrain.com/vector-tech/golib/os/path/home"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
-	"e.coding.net/vector-tech/golib/sec/license"
+	"git.sabertrain.com/vector-tech/golib/sec/license"
 )
 
 // Read 读取授权
