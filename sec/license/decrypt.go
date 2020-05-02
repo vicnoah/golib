@@ -3,8 +3,8 @@ package license
 import (
 	"bytes"
 	"crypto/sha1"
-	"git.sabertrain.com/vector-tech/golib/sec/aes"
-	"git.sabertrain.com/vector-tech/golib/sec/rsa"
+	"git.sabertrain.com/vector-dev/golib/sec/aes"
+	"git.sabertrain.com/vector-dev/golib/sec/rsa"
 	"encoding/gob"
 )
 // Decrypt Decrypting gob encrypted data based on aes-cbc-128

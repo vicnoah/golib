@@ -9,10 +9,10 @@ import (
 	"os"
 	"strconv"
 
-	vbrowser "git.sabertrain.com/vector-tech/golib/helper/browser"
+	vbrowser "git.sabertrain.com/vector-dev/golib/helper/browser"
 
-	"git.sabertrain.com/vector-tech/golib/sec/license/salt"
-	"git.sabertrain.com/vector-tech/golib/sec/license/wr"
+	"git.sabertrain.com/vector-dev/golib/sec/license/salt"
+	"git.sabertrain.com/vector-dev/golib/sec/license/wr"
 )
 
 const (

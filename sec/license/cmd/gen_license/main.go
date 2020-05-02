@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"git.sabertrain.com/vector-tech/golib/sec/license"
+	"git.sabertrain.com/vector-dev/golib/sec/license"
 )
 
 var (

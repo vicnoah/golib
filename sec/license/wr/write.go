@@ -7,7 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"git.sabertrain.com/vector-tech/golib/os/path/home"
+	"git.sabertrain.com/vector-dev/golib/os/path/home"
 )
 
 // Write 写入授权

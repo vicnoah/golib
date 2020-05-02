@@ -1,4 +1,4 @@
-module git.sabertrain.com/vector-tech/golib
+module git.sabertrain.com/vector-dev/golib
 
 go 1.13
 

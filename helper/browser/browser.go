@@ -1,7 +1,7 @@
 package vbrowser
 
 import (
-	"git.sabertrain.com/vector-tech/golib/util/cmd"
+	"git.sabertrain.com/vector-dev/golib/util/cmd"
 	"fmt"
 	"runtime"
 )

@@ -11,7 +11,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
-	crsa "git.sabertrain.com/vector-tech/golib/sec/crypt/rsa"
+	crsa "git.sabertrain.com/vector-dev/golib/sec/crypt/rsa"
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
