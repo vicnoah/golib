@@ -3,16 +3,18 @@ package license
 import (
 	"bytes"
 	"crypto/sha1"
+	"encoding/gob"
+
 	"git.sabertrain.com/vector-dev/golib/pkg/sec/vaes"
 	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
-	"encoding/gob"
 )
+
 // Decrypt Decrypting gob encrypted data based on aes-cbc-128
 func Decrypt(data, salt, rsaPublicKey []byte) (ret []byte, err error) {
 	var (
 		payload Payload
-		buf bytes.Buffer
-		)
+		buf     bytes.Buffer
+	)
 	_, err = buf.Write(data)
 	if err != nil {
 		return
@@ -22,7 +24,7 @@ func Decrypt(data, salt, rsaPublicKey []byte) (ret []byte, err error) {
 	if err != nil {
 		return
 	}
-	passHash, err := rsa.PubKeyDecrypt(rsaPublicKey, payload.Rsa)
+	passHash, err := vrsa.PubKeyDecrypt(rsaPublicKey, payload.Rsa)
 	if err != nil {
 		return
 	}
@@ -33,6 +35,6 @@ func Decrypt(data, salt, rsaPublicKey []byte) (ret []byte, err error) {
 	h2 := sha1.New()
 	h2.Write(passwd)
 	hashPasswd := h2.Sum(nil)
-	ret, err = aes.CBCDecrypt(payload.Aes, hashPasswd, []byte(_IV))
+	ret, err = vaes.CBCDecrypt(payload.Aes, hashPasswd, []byte(_IV))
 	return
 }

@@ -2,38 +2,39 @@ package license
 
 import (
 	"bytes"
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestLicense(t *testing.T) {
-	var datas = []struct{
-		Data []byte
-		Pass []byte
-		Salt []byte
+	var datas = []struct {
+		Data       []byte
+		Pass       []byte
+		Salt       []byte
 		privateKey []byte
-		publicKey []byte
+		publicKey  []byte
 	}{
 		{
-			Data:[]byte("123"),
-			Pass:[]byte("-123456"),
+			Data: []byte("123"),
+			Pass: []byte("-123456"),
 			Salt: []byte("1"),
 		},
 		{
-			Data:[]byte("1234567890123456"),
-			Pass:[]byte("-123456"),
+			Data: []byte("1234567890123456"),
+			Pass: []byte("-123456"),
 			Salt: []byte("1"),
 		},
 		{
-			Data:[]byte(`{
+			Data: []byte(`{
 "name": "vector",
 "expire": 360000000,
 "level": 1
 }`),
-			Pass:[]byte("wwg9776586516"),
+			Pass: []byte("wwg9776586516"),
 			Salt: []byte("afjife"),
 		},
 	}
@@ -62,7 +63,7 @@ func TestLicense(t *testing.T) {
 	})
 }
 
-func TestDecryptionLicense(t *testing.T)  {
+func TestDecryptionLicense(t *testing.T) {
 	pubKey := `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCt7uZyFteXRPZdXTqqMw7ND2IC
 p0Si36x/WXMXTNlI2goE4qrTkoWU7s1aNJxIqJItVBUgfzQ6ICkKG/vwcgQ9qf2s
@@ -90,9 +91,9 @@ l9iwl+yVDykrL9H3eVrVqE2Zcq3TQnB9g0cXUexZCYgwnxgwXJWxArl5iYU/jH0D
 func getKey() (privateKey, publicKey []byte, err error) {
 	var (
 		priv bytes.Buffer
-		pub bytes.Buffer
+		pub  bytes.Buffer
 	)
-	err = rsa.GenRsaKey(1024, &priv, &pub)
+	err = vrsa.GenRsaKey(1024, &priv, &pub)
 	if err != nil {
 		return
 	}

@@ -3,9 +3,10 @@ package license
 import (
 	"bytes"
 	"crypto/sha1"
+	"encoding/gob"
+
 	"git.sabertrain.com/vector-dev/golib/pkg/sec/vaes"
 	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
-	"encoding/gob"
 )
 
 const (
@@ -26,11 +27,11 @@ func Encrypt(data, pass, salt, rsaPrivateKey []byte) (ret []byte, err error) {
 	h2 := sha1.New()
 	h2.Write(passwd)
 	hashPasswd := h2.Sum(nil)
-	payload.Aes, err = aes.CBCEncrypt(data, hashPasswd, []byte(_IV))
+	payload.Aes, err = vaes.CBCEncrypt(data, hashPasswd, []byte(_IV))
 	if err != nil {
 		return
 	}
-	payload.Rsa, err = rsa.PriKeyEncrypt(rsaPrivateKey, passHash)
+	payload.Rsa, err = vrsa.PriKeyEncrypt(rsaPrivateKey, passHash)
 	if err != nil {
 		return
 	}

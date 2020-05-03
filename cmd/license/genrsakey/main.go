@@ -1,22 +1,23 @@
 package main
 
 import (
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
 	"flag"
 	"fmt"
 	"os"
 	"path"
+
+	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
 )
 
 const (
 	_PRIVATE_KEY = "priv.pem"
-	_PUBLIC_KEY = "pub.pem"
+	_PUBLIC_KEY  = "pub.pem"
 )
 
 var (
-	help             bool
+	help bool
 	bits int
-	dir string
+	dir  string
 )
 
 func init() {
@@ -26,6 +27,7 @@ func init() {
 }
 
 func main() {
+
 	flag.Parse()
 	if help {
 		flag.Usage()
@@ -50,20 +52,20 @@ func main() {
 		pubName = dir + "/" + _PUBLIC_KEY
 	}
 
-	privFile, err := os.OpenFile(privName,os.O_CREATE|os.O_WRONLY,os.ModePerm)
+	privFile, err := os.OpenFile(privName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		fmt.Printf("%v\r\n", err)
 		return
 	}
 	defer privFile.Close()
-	pubFile, err := os.OpenFile(pubName, os.O_CREATE|os.O_WRONLY,os.ModePerm)
+	pubFile, err := os.OpenFile(pubName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		fmt.Printf("%v\r\n", err)
 		return
 	}
 	defer pubFile.Close()
 
-	err = vrsa.GenrsaKey(bits, privFile, pubFile)
+	err = vrsa.GenRsaKey(bits, privFile, pubFile)
 	if err != nil {
 		fmt.Printf("%v\r\n", err)
 		return
