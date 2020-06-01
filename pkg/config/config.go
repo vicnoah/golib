@@ -31,9 +31,9 @@ func New() *CM {
 
 // CM 配置管理
 type CM struct {
-	configFiles  map[string]string // 监听配置文件
-	watches      []watch           // 配置热更新
-	sync.RWMutex                   // 锁
+	configFiles map[string]string // 监听配置文件
+	watches     []watch           // 配置热更新
+	mu          sync.RWMutex      // 锁
 }
 
 // watch 配置热重载
@@ -45,15 +45,15 @@ type watch struct {
 
 // Add 添加配置文件
 func (c *CM) Add(key, filePath string) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.configFiles[key] = filePath
 }
 
 // ToStruct 转换配置到结构体
 func (c *CM) ToStruct(key string, conf interface{}) (err error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	filePath, ok := c.configFiles[key]
 	if !ok {
 		err = ErrConfigNotFound
@@ -73,8 +73,8 @@ func (c *CM) ToStruct(key string, conf interface{}) (err error) {
 
 // AddWatch 添加观察文件
 func (c *CM) AddWatch(key string, conf interface{}, f func(conf interface{})) {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	cpConf := conf
 	c.watches = append(c.watches, watch{key, cpConf, f})
 }
@@ -108,7 +108,7 @@ func (c *CM) StartWatch() {
 		}
 	}()
 
-	c.RLock()
+	c.mu.RLock()
 	for _, v := range c.watches {
 		filePath, ok := c.configFiles[v.configFileKey]
 		if !ok {
@@ -120,14 +120,14 @@ func (c *CM) StartWatch() {
 			log.Fatal(err)
 		}
 	}
-	c.RUnlock()
+	c.mu.RUnlock()
 	<-done
 }
 
 // notifyChange 通知改变
 func (c *CM) notifyChange(fileName string) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	watch, ok := c.findWatch(fileName)
 	if !ok {
 		return
