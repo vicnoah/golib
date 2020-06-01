@@ -16,6 +16,19 @@ var (
 	ErrConfigNotFound = errors.New("config file not found")
 )
 
+var (
+	c    *CM
+	once sync.Once
+)
+
+// New 新建配置管理器
+func New() *CM {
+	once.Do(func() {
+		c = &CM{}
+	})
+	return c
+}
+
 // CM 配置管理
 type CM struct {
 	configFiles  map[string]string // 监听配置文件
