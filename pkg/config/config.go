@@ -24,7 +24,9 @@ var (
 // New 新建配置管理器
 func New() *CM {
 	once.Do(func() {
-		c = &CM{}
+		c = &CM{
+			configFiles: make(map[string]string, 0),
+		}
 	})
 	return c
 }
