@@ -83,6 +83,11 @@ func (c *CM) AddWatch(key string, conf interface{}, f func(conf interface{})) {
 
 // StartWatch 开始热更新
 func (c *CM) StartWatch() {
+	go c.watch()
+}
+
+// watch 监听配置
+func (c *CM) watch() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return
