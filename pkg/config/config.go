@@ -35,7 +35,6 @@ func New() *CM {
 	once.Do(func() {
 		c = &CM{
 			configFiles: make(map[string]string),
-			kv:          make(map[string]string),
 		}
 	})
 	return c
@@ -55,7 +54,6 @@ type ToStruct func(key string, conf interface{}) error
 type CM struct {
 	configFiles map[string]string // 监听配置文件
 	watches     []watch           // 配置热更新
-	kv          map[string]string // fsnotify监控的真实文件地址与原文件的映射（为兼容软链接）
 	mu          sync.RWMutex      // 锁
 }
 
@@ -112,10 +110,7 @@ func (c *CM) watch() {
 				if c.isk8s() {
 					// kubernetes中
 					if event.Op&fsnotify.Remove == fsnotify.Remove {
-						watcher.Remove(event.Name)
-						watcher.Add(c.kv[event.Name])
 						c.notifyChange(event.Name)
-						delete(c.kv, event.Name)
 					}
 				} else {
 					// linux中
@@ -152,17 +147,22 @@ func (c *CM) watch() {
 func (c *CM) notifyChange(fileName string) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	watch, ok := c.findWatch(fileName)
-	if !ok {
-		return
+	if c.isk8s() {
+		for _, watch := range c.watches {
+			fmt.Println("配置更新", watch.configFileKey)
+			watch.onWatch()
+		}
+	} else {
+		watch, ok := c.findWatch(fileName)
+		if !ok {
+			return
+		}
+		watch.onWatch()
 	}
-	fmt.Println("配置更新", watch.configFileKey)
-	watch.onWatch()
 }
 
 // findWatch 寻找监听器
 func (c *CM) findWatch(fileName string) (watch, bool) {
-	fileName = c.kv[fileName]
 	for _, v := range c.watches {
 		filePath := c.configFiles[v.configFileKey]
 		if fileName == filePath {
@@ -191,27 +191,40 @@ func (c *CM) toStruct(key string, conf interface{}) (err error) {
 	return
 }
 
-// loadWatcher 重载监听器
+// loadWatcher 载入监听器
 func (c *CM) loadWatcher(watcher *fsnotify.Watcher) (err error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	for i, v := range c.watches {
-		if i == 0 {
-			filePath, ok := c.configFiles[v.configFileKey]
+	for _, v := range c.watches {
+		if c.isk8s() {
+			// k8s中监听整个configmap目录变化，发生变化后配置整体更新
+			fileName, ok := c.configFiles[v.configFileKey]
 			if !ok {
 				err = ErrConfigNotFound
 				return
 			}
-			fileName, _ := filepath.EvalSymlinks(filePath)
-			// 存储路径
-			c.kv[fileName] = filePath
+			configFile := filepath.Clean(fileName)
+			configDir, _ := filepath.Split(configFile)
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = watcher.Add(fileName)
+			err = watcher.Add(configDir)
 			if err != nil {
 				return
 			}
+			break
+		}
+		fileName, ok := c.configFiles[v.configFileKey]
+		if !ok {
+			err = ErrConfigNotFound
+			return
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = watcher.Add(fileName)
+		if err != nil {
+			return
 		}
 	}
 	return
