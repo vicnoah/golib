@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,6 +32,16 @@ func New() *CM {
 	return c
 }
 
+// NewToStruct 创建toStruct
+func (c *CM) NewToStruct(key string, conf interface{}) func() {
+	return func() {
+		c.toStruct(key, conf)
+	}
+}
+
+// ToStruct 类型
+type ToStruct func(key string, conf interface{}) error
+
 // CM 配置管理
 type CM struct {
 	configFiles map[string]string // 监听配置文件
@@ -40,9 +51,8 @@ type CM struct {
 
 // watch 配置热重载
 type watch struct {
-	configFileKey string                 // 配置文件key
-	conf          interface{}            // 配置结构体地址
-	onWatch       func(conf interface{}) // 对应watch回调
+	configFileKey string // 配置文件key
+	onWatch       func() // 对应watch回调
 }
 
 // Add 添加配置文件
@@ -56,29 +66,15 @@ func (c *CM) Add(key, filePath string) {
 func (c *CM) ToStruct(key string, conf interface{}) (err error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	filePath, ok := c.configFiles[key]
-	if !ok {
-		err = ErrConfigNotFound
-		return
-	}
-	f, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-	dataBytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return
-	}
-	err = toml.Decode(string(dataBytes), conf)
+	err = c.toStruct(key, conf)
 	return
 }
 
 // AddWatch 添加观察文件
-func (c *CM) AddWatch(key string, conf interface{}, f func(conf interface{})) {
+func (c *CM) AddWatch(key string, f func()) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	cpConf := conf
-	c.watches = append(c.watches, watch{key, cpConf, f})
+	c.watches = append(c.watches, watch{key, f})
 }
 
 // StartWatch 开始热更新
@@ -103,10 +99,18 @@ func (c *CM) watch() {
 					return
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
+					c.notifyChange(event.Name)
+					continue
+				}
+				// 为兼容vim修改,不完美vim使用:wq保存正常，使用:w会造成文件监控失败同时不能够收到后续通知
+				if event.Op&fsnotify.Rename == fsnotify.Rename {
+					// 文件修改事件中实际会产生Rename事件对原文件监控会失效，需要先移除之前的监控，然后添加新的监控
+					watcher.Remove(event.Name)
+					watcher.Add(event.Name)
 					c.notifyChange(event.Name)
 				}
 			case err, ok := <-watcher.Errors:
+				fmt.Println(err)
 				if !ok {
 					return
 				}
@@ -139,8 +143,7 @@ func (c *CM) notifyChange(fileName string) {
 	if !ok {
 		return
 	}
-	c.ToStruct(watch.configFileKey, watch.conf)
-	watch.onWatch(watch.conf)
+	watch.onWatch()
 }
 
 // findWatch 寻找监听器
@@ -152,4 +155,23 @@ func (c *CM) findWatch(fileName string) (watch, bool) {
 		}
 	}
 	return watch{}, false
+}
+
+// toStruct 转换数据
+func (c *CM) toStruct(key string, conf interface{}) (err error) {
+	filePath, ok := c.configFiles[key]
+	if !ok {
+		err = ErrConfigNotFound
+		return
+	}
+	f, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	dataBytes, err := ioutil.ReadAll(f)
+	if err != nil {
+		return
+	}
+	err = toml.Decode(string(dataBytes), conf)
+	return
 }
