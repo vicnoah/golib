@@ -6,10 +6,18 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
+
+	"git.sabertrain.com/vector-dev/golib/helper/venv"
 
 	"git.sabertrain.com/vector-dev/golib/pkg/encoding/toml"
 	"github.com/fsnotify/fsnotify"
+)
+
+const (
+	// ENV_EXEC 执行所处环境,数据为空默认按照k8s处理,有数据直接按linux处理
+	ENV_EXEC = "EXEC_ENV"
 )
 
 var (
@@ -26,7 +34,8 @@ var (
 func New() *CM {
 	once.Do(func() {
 		c = &CM{
-			configFiles: make(map[string]string, 0),
+			configFiles: make(map[string]string),
+			kv:          make(map[string]string),
 		}
 	})
 	return c
@@ -46,6 +55,7 @@ type ToStruct func(key string, conf interface{}) error
 type CM struct {
 	configFiles map[string]string // 监听配置文件
 	watches     []watch           // 配置热更新
+	kv          map[string]string // fsnotify监控的真实文件地址与原文件的映射（为兼容软链接）
 	mu          sync.RWMutex      // 锁
 }
 
@@ -95,19 +105,31 @@ func (c *CM) watch() {
 		for {
 			select {
 			case event, ok := <-watcher.Events:
+				fmt.Println(event.Op.String())
 				if !ok {
 					return
 				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					c.notifyChange(event.Name)
-					continue
-				}
-				// 为兼容vim修改,不完美vim使用:wq保存正常，使用:w会造成文件监控失败同时不能够收到后续通知
-				if event.Op&fsnotify.Rename == fsnotify.Rename {
-					// 文件修改事件中实际会产生Rename事件对原文件监控会失效，需要先移除之前的监控，然后添加新的监控
-					watcher.Remove(event.Name)
-					watcher.Add(event.Name)
-					c.notifyChange(event.Name)
+				if c.isk8s() {
+					// kubernetes中
+					if event.Op&fsnotify.Remove == fsnotify.Remove {
+						watcher.Remove(event.Name)
+						watcher.Add(c.kv[event.Name])
+						c.notifyChange(event.Name)
+						delete(c.kv, event.Name)
+					}
+				} else {
+					// linux中
+					if event.Op&fsnotify.Write == fsnotify.Write {
+						c.notifyChange(event.Name)
+						continue
+					}
+					// 为兼容vim修改,不完美vim使用:wq保存正常，使用:w会造成文件监控失败同时不能够收到后续通知
+					if event.Op&fsnotify.Rename == fsnotify.Rename {
+						// 文件修改事件中实际会产生Rename事件对原文件监控会失效，需要先移除之前的监控，然后添加新的监控
+						watcher.Remove(event.Name)
+						watcher.Add(event.Name)
+						c.notifyChange(event.Name)
+					}
 				}
 			case err, ok := <-watcher.Errors:
 				fmt.Println(err)
@@ -119,19 +141,10 @@ func (c *CM) watch() {
 		}
 	}()
 
-	c.mu.RLock()
-	for _, v := range c.watches {
-		filePath, ok := c.configFiles[v.configFileKey]
-		if !ok {
-			err = ErrConfigNotFound
-			return
-		}
-		err = watcher.Add(filePath)
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = c.loadWatcher(watcher)
+	if err != nil {
+		log.Fatal(err)
 	}
-	c.mu.RUnlock()
 	<-done
 }
 
@@ -143,11 +156,13 @@ func (c *CM) notifyChange(fileName string) {
 	if !ok {
 		return
 	}
+	fmt.Println("配置更新", watch.configFileKey)
 	watch.onWatch()
 }
 
 // findWatch 寻找监听器
 func (c *CM) findWatch(fileName string) (watch, bool) {
+	fileName = c.kv[fileName]
 	for _, v := range c.watches {
 		filePath := c.configFiles[v.configFileKey]
 		if fileName == filePath {
@@ -174,4 +189,35 @@ func (c *CM) toStruct(key string, conf interface{}) (err error) {
 	}
 	err = toml.Decode(string(dataBytes), conf)
 	return
+}
+
+// loadWatcher 重载监听器
+func (c *CM) loadWatcher(watcher *fsnotify.Watcher) (err error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	for i, v := range c.watches {
+		if i == 0 {
+			filePath, ok := c.configFiles[v.configFileKey]
+			if !ok {
+				err = ErrConfigNotFound
+				return
+			}
+			fileName, _ := filepath.EvalSymlinks(filePath)
+			// 存储路径
+			c.kv[fileName] = filePath
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = watcher.Add(fileName)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+// isk8s 是否在k8s中运行
+func (c *CM) isk8s() bool {
+	return venv.Get(ENV_EXEC) == ""
 }
