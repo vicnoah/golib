@@ -2,9 +2,7 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -86,12 +84,12 @@ func (c *CM) AddWatch(key string, f func()) {
 }
 
 // StartWatch 开始热更新
-func (c *CM) StartWatch() {
-	go c.watch()
+func (c *CM) StartWatch(callback func(error)) {
+	go c.watch(callback)
 }
 
 // watch 监听配置
-func (c *CM) watch() {
+func (c *CM) watch(callback func(error)) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return
@@ -103,7 +101,6 @@ func (c *CM) watch() {
 		for {
 			select {
 			case event, ok := <-watcher.Events:
-				fmt.Println(event.Op.String())
 				if !ok {
 					return
 				}
@@ -121,24 +118,29 @@ func (c *CM) watch() {
 					// 为兼容vim修改,不完美vim使用:wq保存正常，使用:w会造成文件监控失败同时不能够收到后续通知
 					if event.Op&fsnotify.Rename == fsnotify.Rename {
 						// 文件修改事件中实际会产生Rename事件对原文件监控会失效，需要先移除之前的监控，然后添加新的监控
-						watcher.Remove(event.Name)
-						watcher.Add(event.Name)
+						err := watcher.Remove(event.Name)
+						if err != nil {
+							callback(err)
+						}
+						err = watcher.Add(event.Name)
+						if err != nil {
+							callback(err)
+						}
 						c.notifyChange(event.Name)
 					}
 				}
 			case err, ok := <-watcher.Errors:
-				fmt.Println(err)
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				callback(err)
 			}
 		}
 	}()
 
 	err = c.loadWatcher(watcher)
 	if err != nil {
-		log.Fatal(err)
+		callback(err)
 	}
 	<-done
 }
@@ -149,7 +151,6 @@ func (c *CM) notifyChange(fileName string) {
 	defer c.mu.RUnlock()
 	if c.isk8s() {
 		for _, watch := range c.watches {
-			fmt.Println("配置更新", watch.configFileKey)
 			watch.onWatch()
 		}
 	} else {
@@ -206,7 +207,7 @@ func (c *CM) loadWatcher(watcher *fsnotify.Watcher) (err error) {
 			configFile := filepath.Clean(fileName)
 			configDir, _ := filepath.Split(configFile)
 			if err != nil {
-				log.Fatal(err)
+				return
 			}
 			err = watcher.Add(configDir)
 			if err != nil {
@@ -220,7 +221,7 @@ func (c *CM) loadWatcher(watcher *fsnotify.Watcher) (err error) {
 			return
 		}
 		if err != nil {
-			log.Fatal(err)
+			return
 		}
 		err = watcher.Add(fileName)
 		if err != nil {
