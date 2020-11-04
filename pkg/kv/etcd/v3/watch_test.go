@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"time"
 )
 
 func TestWatch(t *testing.T) {
@@ -24,6 +25,19 @@ func TestWatch(t *testing.T) {
 			}
 		}
 	}()
+	gr, err := cli.Grant(context.TODO(), 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = cli.Put(context.TODO(), "q1mi", "dsb", WithLease(LeaseID(gr.ID)))
+	if err != nil {
+		log.Fatal(err)
+	}
+	time.Sleep(time.Second * 5)
+	_, err = cli.Delete(context.TODO(), "q1mi")
+	if err != nil {
+		log.Fatal(err)
+	}
 	for i := 0; i <= 5; i++ {
 		_, err = cli.Put(context.TODO(), "q1mi", "dsb")
 		if err != nil {

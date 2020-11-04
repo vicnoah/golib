@@ -24,3 +24,8 @@ type LeaseID clientv3.LeaseID
 func WithLease(leaseID LeaseID) OpOption {
 	return OpOption(clientv3.WithLease(clientv3.LeaseID(leaseID)))
 }
+
+// WithPrefix watch prefix
+func WithPrefix() OpOption {
+	return OpOption(clientv3.WithPrefix())
+}
