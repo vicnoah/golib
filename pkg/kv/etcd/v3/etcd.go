@@ -9,17 +9,11 @@ import (
 
 // New 新建etcd连接
 func New(cfg Config) (ec *Etcd, err error) {
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   cfg.Endpoints,
-		DialTimeout: cfg.DialTimeout,
-	})
+	cli, err := clientv3.New(clientv3.Config(cfg))
 	if err != nil {
 		return
 	}
-	ocli, err := v3ct.New(v3ct.Config{
-		Endpoints:   cfg.Endpoints,
-		DialTimeout: cfg.DialTimeout,
-	})
+	ocli, err := v3ct.New(v3ct.Config(cfg))
 	ec = &Etcd{
 		cli:  cli,
 		ocli: ocli,

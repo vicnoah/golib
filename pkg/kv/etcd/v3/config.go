@@ -1,11 +1,8 @@
 package v3
 
-import "time"
+import (
+	"go.etcd.io/etcd/clientv3"
+)
 
 // Config 配置管理
-type Config struct {
-	// Endpoints etcd端点
-	Endpoints []string
-	// DialTimeout 超时
-	DialTimeout time.Duration
-}
+type Config clientv3.Config
