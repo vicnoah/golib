@@ -34,8 +34,8 @@ func CBCEncrypt(plantText []byte, key []byte, iv []byte) (cryptBytes []byte, err
 }
 
 // CBCDecrypt Decrypt aes data
-//接收一个16进制编码的字节切片
-//参数1:16进制aes加密数据,参数2:aes加密key,参数3:aes加密偏移向量
+// 接收一个16进制编码的字节切片
+// 参数1:16进制aes加密数据,参数2:aes加密key,参数3:aes加密偏移向量
 func CBCDecrypt(hexStr []byte, key []byte, iv []byte) (data []byte, err error) {
 	cipherText, err := hex.DecodeString(string(hexStr))
 	if err != nil {
