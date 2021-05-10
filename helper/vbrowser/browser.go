@@ -1,9 +1,10 @@
 package vbrowser
 
 import (
-	"git.sabertrain.com/vector-dev/golib/os/exec/vcmd"
 	"fmt"
 	"runtime"
+
+	"github.com/vicnoah/golib/os/exec/vcmd"
 )
 
 var (

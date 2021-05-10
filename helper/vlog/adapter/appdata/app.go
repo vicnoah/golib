@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"git.sabertrain.com/vector-dev/golib/helper/vlog"
-	"git.sabertrain.com/vector-dev/golib/os/path/vhome"
+	"github.com/vicnoah/golib/helper/vlog"
+	"github.com/vicnoah/golib/os/path/vhome"
 )
 
 const (

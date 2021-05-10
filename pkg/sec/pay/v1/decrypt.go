@@ -6,9 +6,9 @@ import (
 	"errors"
 	"strings"
 
-	"git.sabertrain.com/vector-dev/golib/crypto/vaes"
-	"git.sabertrain.com/vector-dev/golib/crypto/vrsa"
-	"git.sabertrain.com/vector-dev/golib/crypto/vsha"
+	"github.com/vicnoah/golib/crypto/vaes"
+	"github.com/vicnoah/golib/crypto/vrsa"
+	"github.com/vicnoah/golib/crypto/vsha"
 )
 
 var (

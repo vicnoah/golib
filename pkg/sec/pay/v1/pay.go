@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 
-	"git.sabertrain.com/vector-dev/golib/crypto/vrsa"
-	"git.sabertrain.com/vector-dev/golib/crypto/vsha"
+	"github.com/vicnoah/golib/crypto/vrsa"
+	"github.com/vicnoah/golib/crypto/vsha"
 )
 
 // GrabKey 支付方抓取密钥

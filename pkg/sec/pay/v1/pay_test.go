@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"git.sabertrain.com/vector-dev/golib/crypto/vaes"
-	"git.sabertrain.com/vector-dev/golib/crypto/vrsa"
-	"git.sabertrain.com/vector-dev/golib/crypto/vsha"
-	"git.sabertrain.com/vector-dev/golib/pkg/rand"
+	"github.com/vicnoah/golib/crypto/vaes"
+	"github.com/vicnoah/golib/crypto/vrsa"
+	"github.com/vicnoah/golib/crypto/vsha"
+	"github.com/vicnoah/golib/pkg/rand"
 )
 
 const (

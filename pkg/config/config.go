@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"sync"
 
-	"git.sabertrain.com/vector-dev/golib/helper/venv"
+	"github.com/vicnoah/golib/helper/venv"
 
-	"git.sabertrain.com/vector-dev/golib/pkg/encoding/toml"
 	"github.com/fsnotify/fsnotify"
+	"github.com/vicnoah/golib/pkg/encoding/toml"
 )
 
 const (

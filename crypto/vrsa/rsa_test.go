@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"git.sabertrain.com/vector-dev/golib/crypto/vsha"
+	"github.com/vicnoah/golib/crypto/vsha"
 )
 
 func TestRsa(t *testing.T) {

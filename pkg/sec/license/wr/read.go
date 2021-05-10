@@ -1,13 +1,14 @@
 package wr
 
 import (
-	"git.sabertrain.com/vector-dev/golib/os/path/vhome"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/license"
+	"github.com/vicnoah/golib/os/path/vhome"
+
+	"github.com/vicnoah/golib/pkg/sec/license"
 )
 
 // Read 读取授权

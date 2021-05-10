@@ -6,20 +6,21 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/license"
+
+	"github.com/vicnoah/golib/pkg/sec/license"
 )
 
 var (
-	help bool
+	help       bool
 	privateKey string
 	rawLicense string
-	output string
-	fileName string
-	password string
-	salt string
+	output     string
+	fileName   string
+	password   string
+	salt       string
 )
 
-func init()  {
+func init() {
 	flag.BoolVar(&help, "help", false, "help")
 	flag.StringVar(&password, "p", "", "`Authorization file password`")
 	flag.StringVar(&salt, "s", "", "`Information used to authorize binding with the computer`")

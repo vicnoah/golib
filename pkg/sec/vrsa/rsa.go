@@ -11,15 +11,16 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
-	"git.sabertrain.com/vector-dev/golib/crypto/vrsa"
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
+
+	"github.com/vicnoah/golib/crypto/vrsa"
 )
 
 var (
-	ErrPublicKey = errors.New("public key error")
-	ErrPrivateKey = errors.New("private key error")
+	ErrPublicKey      = errors.New("public key error")
+	ErrPrivateKey     = errors.New("private key error")
 	ErrParsePublicKey = errors.New("parse public key error")
 )
 
@@ -70,7 +71,7 @@ func PriKeyEncrypt(privateKey, data []byte) (cipher []byte, err error) {
 	if err != nil {
 		return
 	}
-	cipher, err =  vrsa.PrivateEncrypt(priv, data)
+	cipher, err = vrsa.PrivateEncrypt(priv, data)
 	return
 }
 

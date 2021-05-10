@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
+	"github.com/vicnoah/golib/pkg/sec/vrsa"
 )
 
 const (

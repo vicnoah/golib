@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"git.sabertrain.com/vector-dev/golib/pkg/sec/vrsa"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/vicnoah/golib/pkg/sec/vrsa"
 )
 
 func TestLicense(t *testing.T) {

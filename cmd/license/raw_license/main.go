@@ -6,30 +6,31 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"git.sabertrain.com/vector-dev/golib/cmd/license/raw_license/stuc"
 	"time"
+
+	"github.com/vicnoah/golib/cmd/license/raw_license/stuc"
 )
 
 const (
-	_OneDay = 3600*24
-	_OneYear = 365
+	_OneDay   = 3600 * 24
+	_OneYear  = 365
 	_Dinsight = "dinsight"
 )
 
 var (
-	help bool
-	app string
-	appName string
+	help       bool
+	app        string
+	appName    string
 	appVersion string
-	startTime string
-	award string
-	isExp bool
-	expire int
-	perName string
+	startTime  string
+	award      string
+	isExp      bool
+	expire     int
+	perName    string
 	outputName string
 )
 
-func init()  {
+func init() {
 	flag.BoolVar(&help, "help", false, "help")
 	flag.StringVar(&app, "a", "dinsight", "Need to create authorized software name")
 	flag.StringVar(&appName, "an", "", "`Software Name`")
@@ -60,7 +61,7 @@ func main() {
 		startTimestamp = t.Unix()
 	}
 	if perName == "" {
-		fmt.Printf("\n%s\n","权限文件不能为空")
+		fmt.Printf("\n%s\n", "权限文件不能为空")
 		return
 	}
 	perFile, err := os.Open(perName)
