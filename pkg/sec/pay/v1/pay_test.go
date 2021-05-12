@@ -93,7 +93,7 @@ func serverPay(payCipher string, privStr string) (payData string, err error) {
 	if err != nil {
 		return
 	}
-	var pubBuf = bytes.NewBuffer([]byte{})
+	var pubBuf = bytes.NewBuffer(nil)
 	_, err = pubBuf.Write(rsaPub)
 	if err != nil {
 		return
@@ -108,7 +108,7 @@ func serverPay(payCipher string, privStr string) (payData string, err error) {
 		return
 	}
 	// step3 解密aes密码
-	var serverPrivBuf = bytes.NewBuffer([]byte{})
+	var serverPrivBuf = bytes.NewBuffer(nil)
 	_, err = serverPrivBuf.Write([]byte(privStr))
 	if err != nil {
 		return
@@ -148,8 +148,8 @@ func clientPay(keyPair string) (payCipher string, err error) {
 	// step1 生成客户端随机rsa pkcs#1加密对
 	// 此密钥对用于对数据签名
 	var (
-		privBuf = bytes.NewBuffer([]byte{})
-		pubBuf  = bytes.NewBuffer([]byte{})
+		privBuf = bytes.NewBuffer(nil)
+		pubBuf  = bytes.NewBuffer(nil)
 	)
 	// 生成密钥
 	err = vrsa.GenerateRSAKey(privBuf, pubBuf, 1024)
@@ -163,7 +163,7 @@ func clientPay(keyPair string) (payCipher string, err error) {
 	aesKey := rand.GetString(aesKeyLength)
 
 	// step3 加密aes密钥对
-	var serverPubBuf = bytes.NewBuffer([]byte{})
+	var serverPubBuf = bytes.NewBuffer(nil)
 	_, err = serverPubBuf.Write([]byte(serverPubStr))
 	if err != nil {
 		return
@@ -232,7 +232,7 @@ func clientVerifyPss(keyPair string) (ok bool, pubStr string, err error) {
 		return
 	}
 	// 读取并使用公钥
-	buf := bytes.NewBuffer([]byte{})
+	buf := bytes.NewBuffer(nil)
 	buf.WriteString(pubStr)
 	pubKey, err := vrsa.ParsePKIXPublicKey(buf)
 	if err != nil {

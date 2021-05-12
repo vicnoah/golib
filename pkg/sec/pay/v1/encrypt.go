@@ -39,8 +39,8 @@ func Encrypt(keyPair string, payload string) (payCipher string, err error) {
 	// step1 生成客户端随机rsa pkcs#1加密对
 	// 此密钥对用于对数据签名
 	var (
-		privBuf = bytes.NewBuffer([]byte{})
-		pubBuf  = bytes.NewBuffer([]byte{})
+		privBuf = bytes.NewBuffer(nil)
+		pubBuf  = bytes.NewBuffer(nil)
 	)
 	// 生成密钥
 	err = vrsa.GenerateRSAKey(privBuf, pubBuf, 1024)
@@ -54,7 +54,7 @@ func Encrypt(keyPair string, payload string) (payCipher string, err error) {
 	aesKey := rand.GetString(payAesKeyLength)
 
 	// step3 加密aes密钥对
-	var serverPubBuf = bytes.NewBuffer([]byte{})
+	var serverPubBuf = bytes.NewBuffer(nil)
 	_, err = serverPubBuf.Write([]byte(serverPubStr))
 	if err != nil {
 		return
@@ -117,7 +117,7 @@ func VerifyPss(keyPair string) (ok bool, pubStr string, err error) {
 		return
 	}
 	// 读取并使用公钥
-	buf := bytes.NewBuffer([]byte{})
+	buf := bytes.NewBuffer(nil)
 	buf.WriteString(pubStr)
 	pubKey, err := vrsa.ParsePKIXPublicKey(buf)
 	if err != nil {

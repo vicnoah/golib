@@ -12,8 +12,8 @@ import (
 // keyPair: 密钥对 = base64(密钥.签名<rsapss(sha256(公钥))>)
 func GrabKey(bits int) (privStr, pubStr, keyPair string, err error) {
 	var (
-		privBuf = bytes.NewBuffer([]byte{})
-		pubBuf  = bytes.NewBuffer([]byte{})
+		privBuf = bytes.NewBuffer(nil)
+		pubBuf  = bytes.NewBuffer(nil)
 	)
 	// 生成密钥
 	err = vrsa.GenerateRSAKey(privBuf, pubBuf, bits)
