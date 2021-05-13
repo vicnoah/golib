@@ -45,6 +45,92 @@ func TestPay(t *testing.T) {
 	fmt.Println("支付成功")
 }
 
+func TestClientPay(t *testing.T) {
+	keyPair := `LS0tLS1CRUdJTiBSU0EgUHVibGljIEtleS0tLS0tCk1JR2ZNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0R05BRENCaVFLQmdRRHhrMkNTWG5BTXNWdnJ2NGpCOFI1WE1ncysKRFBHVGkvRDZEdk1DSWpsMmpwSzdobkdJS1l5RE1VcXljMjNJU3FrWHZvY0RuVk5OaUc4aXc2NWVNOWN5N1BCeQpzN1Y3QTk2Q095Y0xWV0tUeWkxUWI4WGthN0Vpcm9ueTVtWkh0bEF1RktLUzNzYWF1Y0RTYUNYUHhtQk4veGFhCnhpbFdMbmxOZi91dnZTZFlMd0lEQVFBQgotLS0tLUVORCBSU0EgUHVibGljIEtleS0tLS0tCi5tQ0cwOHVoM3J3RXhQY052MDl0OUp4MThlNHNYOGpDc21pKzBxWFA5dHBKSVg4NlhBZ2hCallvWWJiM0VtdzA5TDJIQVR2RGFadFhrWjJPTHBDL3E3dC83ZjNQUHFnZGp6MXcxd2RRaC9oY0h6dU9qS3JBR1R2ZWIzYklyQWM0MEtxZElkVWNqcGd1RVdDRU5Zdlc4UEs2bU05QTkrMGdLOGR1OHRYRGgxY1E9`
+	// 支付环境安全验证
+	ok, serverPubStr, err := clientVerifyPss(keyPair)
+	if err != nil {
+		return
+	}
+	if !ok {
+		fmt.Println("签名验证失败,支付环境不安全")
+		err = errors.New("pay environment not secure")
+		return
+	}
+	// 支付数据加解密
+	// 处理key pair
+
+	// step1 生成客户端随机rsa pkcs#1加密对
+	// 此密钥对用于对数据签名
+	var (
+		privBuf = bytes.NewBuffer(nil)
+		pubBuf  = bytes.NewBuffer(nil)
+	)
+	// 生成密钥
+	err = vrsa.GenerateRSAKey(privBuf, pubBuf, 1024)
+	if err != nil {
+		return
+	}
+	// privStr := privBuf.String()
+	pubStr := pubBuf.String()
+
+	// step2 生成随机aes加密密钥
+	aesKey := rand.GetString(aesKeyLength)
+
+	// step3 加密aes密钥对
+	var serverPubBuf = bytes.NewBuffer(nil)
+	_, err = serverPubBuf.Write([]byte(serverPubStr))
+	if err != nil {
+		return
+	}
+	aesKeyCipherText, err := vrsa.EncryptOAEP(serverPubBuf, aesKey)
+	if err != nil {
+		return
+	}
+
+	// step4 支付数据加密
+	payload := `
+{
+	"password": "404ae203e933c1f70037f2450e77a2a5",
+	"captcha": "439945"
+}
+	`
+	payCipherBs, err := vaes.CBCEncrypt([]byte(payload), []byte(aesKey))
+	if err != nil {
+		return
+	}
+	payCipherText := base64.StdEncoding.EncodeToString(payCipherBs)
+
+	// step5 主体密文 = 将加密aes密钥对,支付密文,客户端签名公钥进行连接
+	// 主体密文 = 支付密文 + 加密(aes密钥) + 客户端随机rsa公钥
+	// 支付密文 = base64(aes256(payload))
+	// aes密钥 = base64(RSA OAEP(aes密钥))
+	// 客户端公钥 = base64(rsa随机公钥)
+	b64PubStr := base64.StdEncoding.EncodeToString([]byte(pubStr))
+	cipherBody := payCipherText + "." + aesKeyCipherText + "." + b64PubStr
+
+	// step6 使用客户端随机rsa私钥进行sha256数据签名并连接主体密文
+	// 签名也是签主体密文
+	// 最终密文 = 主体密文 + 签名(主体密文)
+	// 密钥格式: 采用点分形式 支付密文.aes密钥.客户端rsa公钥.签名
+	// 密文示例: OipsPI=.oWbWKRUU=.6+nEm9wmcT/bW.Em9wmcT/bWrchg
+	digest, err := vsha.Sha256Hash(cipherBody)
+	if err != nil {
+		return
+	}
+	privateKey, err := vrsa.ParsePKCS1PrivateKey(privBuf)
+	if err != nil {
+		return
+	}
+	sigBody, err := vrsa.SignPSS(privateKey, digest)
+	if err != nil {
+		return
+	}
+	payCipher := cipherBody + "." + sigBody
+	fmt.Println(payCipher)
+	return
+}
+
 func TestPayCheck(t *testing.T) {
 	// 为支付app抓取密钥
 	privStr, pubStr, keyPair, err := GrabKey(1024)

@@ -93,7 +93,7 @@ func decryptVerifySign(rsaPubCipherText, bodyCipherText, sig string) (pubStr str
 		err = ErrPayDataTamper
 		return
 	}
-	pubStr = pubBuf.String()
+	pubStr = string(rsaPub)
 	return
 }
 
