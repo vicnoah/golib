@@ -21,9 +21,9 @@ var (
 
 step1 将密文块分包
 	各部分数据,及主体数据
-	1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.签名密文
-	body密文 = 支付密文.aes密钥.客户端rsa公钥
-	payCipherText, aesKeyCipherText, rsaPubCipherText, sig, bodyCipherText := payCipherBlock(payCipher)
+	1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.服务端rsa公钥密文 5.签名密文
+	body密文 = 支付密文.aes密钥.客户端rsa公钥.服务端rsa公钥
+	payCipherText, aesKeyCipherText, rsaPubCipherText, serverRsaPubCipherText, sig, bodyCipherText := payCipherBlock(payCipher)
 step2 验证主体数据签名
 	_, err = decryptVerifySign(rsaPubCipherText, bodyCipherText, sig)
 	if err != nil {
@@ -34,13 +34,17 @@ step4 解密支付密文
 */
 
 // DecryptWithFn 通过钩子函数读取密钥并解密
-func DecryptWithFn(payCipher string, pf func(pubStr string) (privStr string, err error)) (payData string, err error) {
-	payCipherText, aesKeyCipherText, rsaPubCipherText, sig, bodyCipherText := payCipherBlock(payCipher)
-	pubKey, err := decryptVerifySign(rsaPubCipherText, bodyCipherText, sig)
+func DecryptWithFn(payCipher string, pf func(serverPubStr string) (privStr string, err error)) (payData string, err error) {
+	payCipherText, aesKeyCipherText, rsaPubCipherText, serverRsaPubCipherText, sig, bodyCipherText := payCipherBlock(payCipher)
+	_, err = decryptVerifySign(rsaPubCipherText, bodyCipherText, sig)
 	if err != nil {
 		return
 	}
-	privStr, err := pf(pubKey)
+	serverRsaPub, err := base64.StdEncoding.DecodeString(serverRsaPubCipherText)
+	if err != nil {
+		return
+	}
+	privStr, err := pf(string(serverRsaPub))
 	if err != nil {
 		return
 	}
@@ -54,9 +58,9 @@ func Decrypt(payCipher string, privStr string) (payData string, err error) {
 
 	// step1 将密文块分包
 	// 各部分数据,及主体数据
-	// 1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.签名密文
-	// body密文 = 支付密文.aes密钥.客户端rsa公钥
-	payCipherText, aesKeyCipherText, rsaPubCipherText, sig, bodyCipherText := payCipherBlock(payCipher)
+	// 1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.服务端rsa公钥密文 5.签名密文
+	// body密文 = 支付密文.aes密钥.客户端rsa公钥.服务端rsa公钥
+	payCipherText, aesKeyCipherText, rsaPubCipherText, _, sig, bodyCipherText := payCipherBlock(payCipher)
 	// step2 验证主体数据签名
 	_, err = decryptVerifySign(rsaPubCipherText, bodyCipherText, sig)
 	if err != nil {
@@ -123,16 +127,19 @@ func decryptCipher(privStr, aesKeyCipherText, payCipherText string) (payData str
 }
 
 // payCipherBlock 拆分密文块
-func payCipherBlock(payCipher string) (payCipherText, aesKeyCipherText, rsaPubCipherText, sig, bodyCipherText string) {
+func payCipherBlock(payCipher string) (payCipherText, aesKeyCipherText, rsaPubCipherText, serverPubCipherText, sig, bodyCipherText string) {
 	// step1 将密文块分包
 	// 各部分数据,及主体数据
-	// 1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.签名密文
-	// body密文 = 支付密文.aes密钥.客户端rsa公钥
+	// 1.支付密文 2.aes密钥密文 3.客户端rsa公钥密文 4.服务端rsa公钥密文 5.签名密文
+	// body密文 = 支付密文.aes密钥.客户端rsa公钥.服务端rsa公钥
 	cps := strings.Split(payCipher, ".")
 	payCipherText = cps[0]
 	aesKeyCipherText = cps[1]
 	rsaPubCipherText = cps[2]
-	sig = cps[3]
-	bodyCipherText = payCipherText + "." + aesKeyCipherText + "." + rsaPubCipherText
+	serverPubCipherText = cps[3]
+	sig = cps[4]
+	bodyCipherArr := make([]string, 0)
+	bodyCipherArr = append(bodyCipherArr, payCipherText, aesKeyCipherText, rsaPubCipherText, serverPubCipherText)
+	bodyCipherText = strings.Join(bodyCipherArr, ".")
 	return
 }

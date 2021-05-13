@@ -72,18 +72,22 @@ func Encrypt(keyPair string, payload string) (payCipher string, err error) {
 	payCipherText := base64.StdEncoding.EncodeToString(payCipherBs)
 
 	// step5 主体密文 = 将加密aes密钥对,支付密文,客户端签名公钥进行连接
-	// 主体密文 = 支付密文 + 加密(aes密钥) + 客户端随机rsa公钥
+	// 主体密文 = 支付密文 + 加密(aes密钥) + 客户端随机rsa公钥 + 服务端rsa公钥
 	// 支付密文 = base64(aes256(payload))
 	// aes密钥 = base64(RSA OAEP(aes密钥))
 	// 客户端公钥 = base64(rsa随机公钥)
+	// 服务端公钥 = base64(服务端rsa公钥)
 	b64PubStr := base64.StdEncoding.EncodeToString([]byte(pubStr))
-	cipherBody := payCipherText + "." + aesKeyCipherText + "." + b64PubStr
+	b64ServerPubStr := base64.StdEncoding.EncodeToString([]byte(serverPubStr))
+	payCipherArr := make([]string, 0)
+	payCipherArr = append(payCipherArr, payCipherText, aesKeyCipherText, b64PubStr, b64ServerPubStr)
+	cipherBody := strings.Join(payCipherArr, ".")
 
 	// step6 使用客户端随机rsa私钥进行sha256数据签名并连接主体密文
 	// 签名也是签主体密文
 	// 最终密文 = 主体密文 + 签名(主体密文)
-	// 密钥格式: 采用点分形式 支付密文.aes密钥.客户端rsa公钥.签名
-	// 密文示例: OipsPI=.oWbWKRUU=.6+nEm9wmcT/bW.Em9wmcT/bWrchg
+	// 密钥格式: 采用点分形式 支付密文.aes密钥.客户端rsa公钥.服务端rsa公钥.签名
+	// 密文示例: OipsPI=.oWbWKRUU=.6+nEm9wmcT/bW.6+nEm9wmcT/bW.Em9wmcT/bWrchg
 	digest, err := vsha.Sha256Hash(cipherBody)
 	if err != nil {
 		return
@@ -96,7 +100,8 @@ func Encrypt(keyPair string, payload string) (payCipher string, err error) {
 	if err != nil {
 		return
 	}
-	payCipher = cipherBody + "." + sigBody
+	payCipherArr = append(payCipherArr, sigBody)
+	payCipher = strings.Join(payCipherArr, ".")
 	return
 }
 
