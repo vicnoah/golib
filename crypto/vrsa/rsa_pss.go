@@ -10,7 +10,7 @@ import (
 // SignPSS rsa pss签名算法
 // signature为base64编码
 func SignPSS(priv *rsa.PrivateKey, digest string) (signature string, err error) {
-	signatureBs, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, []byte(digest), nil)
+	signatureBs, err := rsa.SignPSS(rand.Reader, priv, crypto.SHA256, []byte(digest), &rsa.PSSOptions{SaltLength: -1})
 	signature = base64.StdEncoding.EncodeToString(signatureBs)
 	return
 }
@@ -21,7 +21,7 @@ func VerifyPSS(pub *rsa.PublicKey, digest, signature string) (ok bool) {
 	if err != nil {
 		return
 	}
-	err = rsa.VerifyPSS(pub, crypto.SHA256, []byte(digest), bs, nil)
+	err = rsa.VerifyPSS(pub, crypto.SHA256, []byte(digest), bs, &rsa.PSSOptions{SaltLength: -1})
 	if err == nil {
 		ok = true
 		return

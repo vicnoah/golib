@@ -26,7 +26,7 @@ func EncryptOAEP(pub io.Reader, text string) (ciphertext string, err error) {
 
 // DecryptOAEP rsa OAEP解密算法
 func DecryptOAEP(priv io.Reader, ciphertext string) (text string, err error) {
-	rsaPrivateKey, err := ParsePKCS1PrivateKey(priv)
+	rsaPrivateKey, err := ParsePKCS8PrivateKey(priv)
 	if err != nil {
 		return
 	}

@@ -23,7 +23,7 @@ func GrabKey(bits int) (privStr, pubStr, keyPair string, err error) {
 	privStr = privBuf.String()
 	pubStr = pubBuf.String()
 	// 生成公有密钥签名,使用sha256生成摘要
-	privateKey, err := vrsa.ParsePKCS1PrivateKey(privBuf)
+	privateKey, err := vrsa.ParsePKCS8PrivateKey(privBuf)
 	if err != nil {
 		return
 	}

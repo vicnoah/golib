@@ -18,7 +18,10 @@ func GenerateRSAKey(priv io.Writer, pub io.Writer, bits int) (err error) {
 	}
 	// 保存私钥
 	// 通过x509标准将得到的ras私钥序列化为ASN.1 的 DER编码字符串
-	X509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
+	X509PrivateKey, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return
+	}
 	// 使用pem格式对x509输出的内容进行编码
 	// 构建一个pem.Block结构体对象
 	privateBlock := pem.Block{Type: "RSA Private Key", Bytes: X509PrivateKey}

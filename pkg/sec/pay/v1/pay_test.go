@@ -122,7 +122,7 @@ func TestClientPay(t *testing.T) {
 	if err != nil {
 		return
 	}
-	privateKey, err := vrsa.ParsePKCS1PrivateKey(privBuf)
+	privateKey, err := vrsa.ParsePKCS8PrivateKey(privBuf)
 	if err != nil {
 		return
 	}
@@ -303,7 +303,7 @@ func clientPay(keyPair string) (payCipher string, err error) {
 	if err != nil {
 		return
 	}
-	privateKey, err := vrsa.ParsePKCS1PrivateKey(privBuf)
+	privateKey, err := vrsa.ParsePKCS8PrivateKey(privBuf)
 	if err != nil {
 		return
 	}

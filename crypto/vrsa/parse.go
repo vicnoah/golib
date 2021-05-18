@@ -22,7 +22,7 @@ func ParsePKIXPublicKey(pub io.Reader) (pk *rsa.PublicKey, err error) {
 	return
 }
 
-// ParsePKCS1PrivateKey 解析ras pkcs1 privateKey
+// ParsePKCS1PrivateKey 解析rsa pkcs1 privateKey
 func ParsePKCS1PrivateKey(priv io.Reader) (priKey *rsa.PrivateKey, err error) {
 	privateKey, err := io.ReadAll(priv)
 	if err != nil {
@@ -30,5 +30,20 @@ func ParsePKCS1PrivateKey(priv io.Reader) (priKey *rsa.PrivateKey, err error) {
 	}
 	block, _ := pem.Decode(privateKey)
 	priKey, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+	return
+}
+
+// ParsePKCS8PrivateKey 解析rsa pkcs8 privateKey
+func ParsePKCS8PrivateKey(priv io.Reader) (privKey *rsa.PrivateKey, err error) {
+	privateKey, err := io.ReadAll(priv)
+	if err != nil {
+		return
+	}
+	block, _ := pem.Decode(privateKey)
+	privKeyInt, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return
+	}
+	privKey = privKeyInt.(*rsa.PrivateKey)
 	return
 }

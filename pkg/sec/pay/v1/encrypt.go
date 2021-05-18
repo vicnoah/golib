@@ -92,7 +92,7 @@ func Encrypt(keyPair string, payload string) (payCipher string, err error) {
 	if err != nil {
 		return
 	}
-	privateKey, err := vrsa.ParsePKCS1PrivateKey(privBuf)
+	privateKey, err := vrsa.ParsePKCS8PrivateKey(privBuf)
 	if err != nil {
 		return
 	}
