@@ -2,7 +2,7 @@ package license
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 
@@ -77,7 +77,7 @@ l9iwl+yVDykrL9H3eVrVqE2Zcq3TQnB9g0cXUexZCYgwnxgwXJWxArl5iYU/jH0D
 		return
 	}
 	defer licenseFile.Close()
-	data, err := ioutil.ReadAll(licenseFile)
+	data, err := io.ReadAll(licenseFile)
 	if err != nil {
 		return
 	}

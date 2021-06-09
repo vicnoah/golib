@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 
@@ -64,7 +64,7 @@ func main() {
 		return
 	}
 	defer rFile.Close()
-	rLicense, err := ioutil.ReadAll(rFile)
+	rLicense, err := io.ReadAll(rFile)
 	if err != nil {
 		fmt.Printf("\n读取原始授权文件失败: %v\n", err)
 		return
@@ -75,7 +75,7 @@ func main() {
 		return
 	}
 	defer pFile.Close()
-	pKey, err := ioutil.ReadAll(pFile)
+	pKey, err := io.ReadAll(pFile)
 	if err != nil {
 		fmt.Printf("\n读取密钥失败: %v\n", err)
 		return

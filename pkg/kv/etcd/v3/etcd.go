@@ -3,8 +3,7 @@ package v3
 import (
 	"context"
 
-	v3ct "github.com/coreos/etcd/clientv3"
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // New 新建etcd连接
@@ -13,27 +12,20 @@ func New(cfg Config) (ec *Etcd, err error) {
 	if err != nil {
 		return
 	}
-	ocli, err := v3ct.New(v3ct.Config(cfg))
 	ec = &Etcd{
-		cli:  cli,
-		ocli: ocli,
+		cli: cli,
 	}
 	return
 }
 
 // Etcd etcd实例
 type Etcd struct {
-	cli  *clientv3.Client
-	ocli *v3ct.Client
+	cli *clientv3.Client
 }
 
 // Close 关闭客户端
 func (ec *Etcd) Close() error {
-	err := ec.cli.Close()
-	if err != nil {
-		return err
-	}
-	return ec.ocli.Close()
+	return ec.cli.Close()
 }
 
 // PutResponse put响应

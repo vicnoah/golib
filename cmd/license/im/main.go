@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -99,7 +99,7 @@ func actionRead() (err error) {
 	if err != nil {
 		return
 	}
-	pubKey, err := ioutil.ReadAll(f)
+	pubKey, err := io.ReadAll(f)
 	if err != nil {
 		return
 	}

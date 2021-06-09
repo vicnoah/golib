@@ -2,7 +2,6 @@ package wr
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,7 +17,7 @@ func Write(input io.Reader) (err error) {
 	if err != nil {
 		return
 	}
-	licenseData, err := ioutil.ReadAll(input)
+	licenseData, err := io.ReadAll(input)
 	if err != nil {
 		return
 	}

@@ -1,7 +1,7 @@
 package wr
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -22,7 +22,7 @@ func Read(salt, pubKey []byte) (ret []byte, err error) {
 	}
 	defer f.Close()
 
-	licenseData, err := ioutil.ReadAll(f)
+	licenseData, err := io.ReadAll(f)
 	if err != nil {
 		return
 	}

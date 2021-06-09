@@ -1,7 +1,7 @@
 package v3
 
 import (
-	"go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // OpOption 操作配置

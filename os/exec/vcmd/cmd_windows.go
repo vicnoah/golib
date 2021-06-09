@@ -3,7 +3,7 @@ package vcmd
 import (
 	"bufio"
 	"context"
-	"io/ioutil"
+	"io"
 	"os/exec"
 	"syscall"
 	"time"
@@ -30,10 +30,10 @@ func Command(name string, args ...string) (stdout []byte, stderr []byte, err err
 	}
 
 	r := bufio.NewReader(stdoutPipe)
-	stdout, err = ioutil.ReadAll(r)
+	stdout, err = io.ReadAll(r)
 
 	r = bufio.NewReader(stderrPipe)
-	stderr, err = ioutil.ReadAll(r)
+	stderr, err = io.ReadAll(r)
 
 	if err = cmd.Wait(); err != nil {
 		return

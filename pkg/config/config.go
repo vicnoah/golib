@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -184,7 +184,7 @@ func (c *CM) toStruct(key string, conf interface{}) (err error) {
 	if err != nil {
 		return
 	}
-	dataBytes, err := ioutil.ReadAll(f)
+	dataBytes, err := io.ReadAll(f)
 	if err != nil {
 		return
 	}

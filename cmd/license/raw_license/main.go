@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"time"
 
@@ -70,7 +70,7 @@ func main() {
 		return
 	}
 	defer perFile.Close()
-	per, err := ioutil.ReadAll(perFile)
+	per, err := io.ReadAll(perFile)
 	if err != nil {
 		fmt.Printf("\n读取权限文件失败: %v\n", err)
 		return
